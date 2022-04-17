@@ -89,6 +89,24 @@ static const struct ch_profile profiles[] = {
 		.need_remove_wp = true,
 		.need_last_write = true,
 	},
+	{
+		.name = "CH573",
+		.family = 0x13,
+		.type = 0x73,
+		.code_flash_size = 448 * 1024,
+		.data_flash_size = 32 * 1024,
+		.mcu_id_len = 7,
+		.xor_key_id_len = 8, /* ID plus checksum byte */
+	},
+	{
+		.name = "CH582",
+		.family = 0x16,
+		.type = 0x82,
+		.code_flash_size = 448 * 1024,
+		.data_flash_size = 32 * 1024,
+		.mcu_id_len = 7,
+		.xor_key_id_len = 8, /* ID plus checksum byte */
+	},
 	{}
 };
 
@@ -677,6 +695,7 @@ int main(int argc, char *argv[])
 
 	case 0x020500:
 	case 0x020800:
+	case 0x020700:
 		dev.wait_reboot_resp = true;
 		break;
 
