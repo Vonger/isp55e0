@@ -2,7 +2,7 @@ ISP-55e0 - An ISP flashing tool for the WCH CH55x, CH57x and CH32Fx
 ===================================================================
 
 This tool is meant to flash the WinChipHead CH55x / CH57x / CH32Fx
-series, such as the CH551, CH552, CH554, CH559 or CH579, through USB
+series, such as the CH551, CH552, CH554, CH559, CH579, CH573 or CH582, through USB
 on Linux.
 
 When set in ISP mode, the chip creates a 4348:55e0 USB device, hence
