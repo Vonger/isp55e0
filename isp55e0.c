@@ -90,6 +90,25 @@ static const struct ch_profile profiles[] = {
 		.need_last_write = true,
 	},
 	{
+		.name = "CH32V103",
+		.family = 0x15,
+		.type = 0x3f,
+		.code_flash_size = 65536,
+		.mcu_id_len = 8,
+		.xor_key_id_len = 8,
+		.need_remove_wp = true,
+		.need_last_write = true,
+    },
+	{
+		.name = "CH571",
+		.family = 0x13,
+		.type = 0x71,
+		.code_flash_size = 192 * 1024,
+		.data_flash_size = 32 * 1024,
+		.mcu_id_len = 7,
+		.xor_key_id_len = 8, /* ID plus checksum byte */
+    },
+	{
 		.name = "CH573",
 		.family = 0x13,
 		.type = 0x73,
@@ -267,6 +286,11 @@ static void write_config(struct device *dev)
 	struct resp_write_config resp;
 	int ret;
 
+    // CH573 disable debug mode.
+    if (dev->profile->family == 0x13 && dev->profile->type == 0x73) {
+        dev->config_data[8] = 0x4d;
+    }
+    
 	memcpy(req.config_data, dev->config_data, sizeof(req.config_data));
 
 	if (dev->profile->need_remove_wp && req.config_data[0] == 0xff)
@@ -403,6 +427,7 @@ static int flash_rw(struct device *dev, int cmd, struct content *info,
 	int to_send;
 	int len;
 	int ret;
+    int count = 0;
 
 	/* Send the firmware in 56 bytes chunks */
 	offset = 0;
@@ -422,6 +447,11 @@ static int flash_rw(struct device *dev, int cmd, struct content *info,
 			       &resp, sizeof(resp));
 		if (ret)
 			errx(EXIT_FAILURE, "Write failure at offset %d", offset);
+        
+        if ((count++ % 0x100) == 0) {
+            fprintf(stdout, ".");  // show progress.
+            fflush(stdout);
+        }
 
 		if (resp.return_code != 0) {
 			*offset_out = offset;
@@ -431,6 +461,7 @@ static int flash_rw(struct device *dev, int cmd, struct content *info,
 		to_send -= len;
 		offset += len;
 	}
+    printf("\r\n");
 
 	if (cmd == CMD_WRITE_CODE_FLASH && dev->profile->need_last_write) {
 		/* The CH32Fx need a last empty write. */
@@ -763,12 +794,3 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
-
-/*
- * Local Variables:
- * mode: c
- * c-file-style: "linux"
- * indent-tabs-mode: t
- * tab-width: 8
- * End:
- */
